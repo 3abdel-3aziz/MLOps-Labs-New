@@ -1,4 +1,6 @@
 [core]
-    remote = storage
+    remote = origin
 ['remote "storage"']
     url = https://dagshub.com/ahmed2025.mohamed2000/mlops-labs.dvc
+['remote "origin"']
+    url = https://dagshub.com/ahmed2025.mohamed2000/MLOps-Labs-New.dvc
