@@ -1,0 +1,27 @@
+# configuration file
+paths:
+  raw_data: D:/ITI/iti.mlops/data_0/train.csv
+  train_raw_path: data/interim/train_raw.csv
+  test_raw_path: data/interim/test_raw.csv
+  train_final_path: data/processed/train_final.csv
+  test_final_path: data/processed/test_final.csv
+  model_save: models/saved_model.pkl
+  preprocessor_save: models/preprocessors.pkl
+  metrics_save: reports/metrics.json
+
+params:
+  target: Survived
+  test_size: 0.2
+  random_state: 42
+
+model_params:
+  n_estimators: 500
+  learning_rate: 0.07
+  max_depth: 6
+  subsample: 0.8
+  colsample_bytree: 0.8
+
+hydra:
+  output_subdir:
+  run:
+    dir: .

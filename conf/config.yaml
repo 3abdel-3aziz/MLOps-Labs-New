@@ -1,0 +1,19 @@
+# conf/config.yaml
+paths:
+  train_data: "D:/ITI/iti.mlops/data_0/train.csv"
+  test_data: "D:/ITI/iti.mlops/data_0/test.csv"
+  model_save: "models/saved_model.pkl"
+  preprocessor_save: "models/preprocessors.pkl"
+
+splitting:
+  target: "Survived"
+  train_size: 0.8
+  test_size: 0.2
+  random_state: 42
+
+model:
+  n_estimators: 500
+  learning_rate: 0.05
+  max_depth: 6
+  subsample: 0.8
+  colsample_bytree: 0.8
