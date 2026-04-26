@@ -5,8 +5,8 @@ stages:
     deps:
     - path: config.yaml
       hash: md5
-      md5: 42fa469ef798c3446d5d52d817b9cc01
-      size: 601
+      md5: 732b393e74e7ef2105a711eb6d191b65
+      size: 628
     - path: src/data/make_dataset.py
       hash: md5
       md5: a6f01408e0a325b17153d590802939f5
@@ -15,6 +15,17 @@ stages:
       hash: md5
       md5: fbf4760fdab687d90f12a08c508600ba
       size: 965
+    params:
+      config.yaml:
+        paths:
+          raw_data: D:/ITI/iti.mlops/data_0/train.csv
+          train_raw_path: data/interim/train_raw.csv
+          test_raw_path: data/interim/test_raw.csv
+          train_final_path: data/processed/train_final.csv
+          test_final_path: data/processed/test_final.csv
+          model_save: models/saved_model.pkl
+          preprocessor_save: models/preprocessors.pkl
+          metrics_save: reports/metrics.json
     outs:
     - path: data/interim/test_raw.csv
       hash: md5
@@ -37,13 +48,19 @@ stages:
       size: 19217
     - path: src/features/
       hash: md5
-      md5: 3af08538106512bbe8297c112322381b.dir
-      size: 14825
+      md5: fe45a8b33ea10fa80f0a784bdf4321d2.dir
+      size: 14809
       nfiles: 5
     - path: src/stages/data_preprocess.py
       hash: md5
       md5: 7b8b4f7c30ad99a463183f5cc30f9fd8
       size: 2397
+    params:
+      config.yaml:
+        params:
+          target: Survived
+          test_size: 0.2
+          random_state: 42
     outs:
     - path: data/processed/test_processed.csv
       hash: md5
@@ -60,10 +77,6 @@ stages:
   train:
     cmd: uv run python -m src.stages.train
     deps:
-    - path: config.yaml
-      hash: md5
-      md5: 42fa469ef798c3446d5d52d817b9cc01
-      size: 601
     - path: data/processed/train_processed.csv
       hash: md5
       md5: 14833e6bb64194917556e9f927235013
@@ -72,11 +85,23 @@ stages:
       hash: md5
       md5: 6494916aabd82a8e795893982d5f2f5e
       size: 1120
+    params:
+      config.yaml:
+        model_params:
+          n_estimators: 500
+          learning_rate: 0.2
+          max_depth: 8
+          subsample: 0.8
+          colsample_bytree: 0.8
+        params:
+          target: Survived
+          test_size: 0.2
+          random_state: 42
     outs:
     - path: models/model.joblib
       hash: md5
-      md5: 9f8575eddc4924dda8c23c62ecc33804
-      size: 850286
+      md5: 22e2d344edc7e67e72897c67da7c6c1f
+      size: 911148
   evaluate:
     cmd: uv run python -m src.stages.evaluate
     deps:
@@ -86,18 +111,29 @@ stages:
       size: 6713
     - path: models/model.joblib
       hash: md5
-      md5: 9f8575eddc4924dda8c23c62ecc33804
-      size: 850286
+      md5: 22e2d344edc7e67e72897c67da7c6c1f
+      size: 911148
     - path: src/stages/evaluate.py
       hash: md5
       md5: 9ab8a18e5300493d5dca571ec68f6001
       size: 1754
+    params:
+      config.yaml:
+        paths:
+          raw_data: D:/ITI/iti.mlops/data_0/train.csv
+          train_raw_path: data/interim/train_raw.csv
+          test_raw_path: data/interim/test_raw.csv
+          train_final_path: data/processed/train_final.csv
+          test_final_path: data/processed/test_final.csv
+          model_save: models/saved_model.pkl
+          preprocessor_save: models/preprocessors.pkl
+          metrics_save: reports/metrics.json
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: ad8c7428fc597e0dd1d9161fc2c3c824
+      md5: ff5b7fe990d8ca745a068f3a11e819ed
       size: 123
     - path: reports/metrics.txt
       hash: md5
-      md5: 75004d697ec21f2d8a4ea70ab24887c6
+      md5: e9a408a6d71d441d64c7375e4ab6900e
       size: 364

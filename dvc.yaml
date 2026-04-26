@@ -1,3 +1,6 @@
+params:
+  - config.yaml
+
 stages:
   data_load:
     cmd: uv run python -m src.stages.data_load
@@ -5,6 +8,9 @@ stages:
       - src/stages/data_load.py
       - src/data/make_dataset.py
       - config.yaml
+    params:
+      - config.yaml:
+          - paths  
     outs:
       - data/interim/train_raw.csv
       - data/interim/test_raw.csv
@@ -16,6 +22,9 @@ stages:
       - src/features/
       - data/interim/train_raw.csv
       - data/interim/test_raw.csv
+    params:
+      - config.yaml:
+          - params 
     outs:
       - data/processed/train_processed.csv
       - data/processed/test_processed.csv
@@ -26,7 +35,10 @@ stages:
     deps:
       - src/stages/train.py
       - data/processed/train_processed.csv
-      - config.yaml
+    params:
+      - config.yaml:
+          - model_params 
+          - params       
     outs:
       - models/model.joblib
 
@@ -36,6 +48,9 @@ stages:
       - src/stages/evaluate.py
       - data/processed/test_processed.csv
       - models/model.joblib
+    params:
+      - config.yaml:
+          - paths       
     metrics:
       - reports/metrics.json:
           cache: false
