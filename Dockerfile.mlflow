@@ -1,0 +1,25 @@
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+
+WORKDIR /app
+
+COPY pyproject.toml uv.lock ./
+
+ENV UV_HTTP_TIMEOUT=600
+
+ENV PATH="/app/.venv/bin:$PATH"
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project --no-dev
+
+COPY . .
+
+ENV MLFLOW_TRACKING_URI="https://dagshub.com/ahmed2025.mohamed2000/MLOps-Labs-New.mlflow"
+ENV MODEL_NAME="Titanic_XGBoost_Model"
+ENV MODEL_VERSION="1"
+ENV PORT=5000
+
+EXPOSE 5000
+
+CMD ["mlflow", "models", "serve", \
+     "--model-uri", "models:/Titanic_XGBoost_Model/1", \
+     "--no-conda", "--port", "5000", "--host", "0.0.0.0"]
