@@ -40,7 +40,8 @@ def train(cfg: DictConfig):
 
         os.makedirs("models", exist_ok=True)
         model_path = "models/model.joblib" 
-        joblib.dump(model, model_path)
+        joblib.dump(model, model_path)  #  saving the model local 
+        mlflow.log_artifact(model_path, artifact_path="saved_model")
         
         print(f" Model trained and saved to: {model_path}")
 
