@@ -5,6 +5,8 @@ import hydra
 import joblib
 import pandas as pd
 from omegaconf import DictConfig
+import mlflow.xgboost  
+import dagshub
 from sklearn.metrics import (
     accuracy_score,
     classification_report,
@@ -13,45 +15,47 @@ from sklearn.metrics import (
     recall_score,
 )
 
+dagshub.init(repo_owner='ahmed2025.mohamed2000', repo_name='MLOps-Labs-New', mlflow=True)
 @hydra.main(config_path="../../", config_name="config", version_base="1.2")
 def evaluate(cfg: DictConfig):
-    test_df = pd.read_csv("data/processed/test_processed.csv")
-    
-    model = joblib.load("models/model.joblib")
+    with mlflow.start_run():
 
-    TARGET = cfg.params.target
-    X_test = test_df.drop(columns=[TARGET])
-    y_test = test_df[TARGET]
+        test_df = pd.read_csv("data/processed/test_processed.csv")
+        
+        model = joblib.load("models/model.joblib")
 
-    print("Evaluating model...")
-    preds = model.predict(X_test)
+        TARGET = cfg.params.target
+        X_test = test_df.drop(columns=[TARGET])
+        y_test = test_df[TARGET]
 
-    acc = accuracy_score(y_test, preds)
-    report = classification_report(y_test, preds)
+        print("Evaluating model...")
+        preds = model.predict(X_test)
 
-    print(f"\n Model Accuracy: {acc:.4f}")
-    print("\nDetailed Classification Report:")
-    print(report)
+        acc = accuracy_score(y_test, preds)
+        report = classification_report(y_test, preds)
 
-    os.makedirs("reports", exist_ok=True)
+        print(f"\n Model Accuracy: {acc:.4f}")
+        print("\nDetailed Classification Report:")
+        print(report)
 
-    # --- JSON metrics file (parsed by DVC for experiment tracking) ---
-    metrics = {
-        "accuracy": round(acc, 6),
-        "f1_weighted": round(f1_score(y_test, preds, average="weighted"), 6),
-        "precision_weighted": round(precision_score(y_test, preds, average="weighted"), 6),
-        "recall_weighted": round(recall_score(y_test, preds, average="weighted"), 6),
-    }
-    with open("reports/metrics.json", "w") as f:
-        json.dump(metrics, f, indent=2)
+        os.makedirs("reports", exist_ok=True)
 
-    # --- Human-readable text report (not declared as a DVC metrics file) ---
-    with open("reports/metrics.txt", "w") as f:
-        f.write(f"Accuracy: {acc}\n")
-        f.write(report)
+        metrics = {
+            "accuracy": round(acc, 6),
+            "f1_weighted": round(f1_score(y_test, preds, average="weighted"), 6),
+            "precision_weighted": round(precision_score(y_test, preds, average="weighted"), 6),
+            "recall_weighted": round(recall_score(y_test, preds, average="weighted"), 6),
+        }
+        with open("reports/metrics.json", "w") as f:
+            json.dump(metrics, f, indent=2)
 
-    print(f" Metrics saved -> reports/metrics.json")
-    print(" Evaluation completed and metrics saved via Hydra!")
+        with open("reports/metrics.txt", "w") as f:
+            f.write(f"Accuracy: {acc}\n")
+            f.write(report)
+        mlflow.log_metrics(metrics)    
+
+        print(f" Metrics saved -> reports/metrics.json")
+        print(" Evaluation completed and metrics saved via Hydra!")
 
 if __name__ == "__main__":
     evaluate()
