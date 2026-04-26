@@ -48,7 +48,7 @@ stages:
       size: 19217
     - path: src/features/
       hash: md5
-      md5: fe45a8b33ea10fa80f0a784bdf4321d2.dir
+      md5: 95b50b252c7a7bbdf2ddce7acbb3fa3c.dir
       size: 14809
       nfiles: 5
     - path: src/stages/data_preprocess.py
@@ -83,8 +83,8 @@ stages:
       size: 26257
     - path: src/stages/train.py
       hash: md5
-      md5: 8dcc3ff6c7b14b79bfe4c257ce4f101a
-      size: 1541
+      md5: dd8b0a4d9938249536856fdabf7fc3be
+      size: 1639
     params:
       config.yaml:
         model_params:
