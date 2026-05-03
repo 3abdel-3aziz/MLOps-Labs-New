@@ -4,8 +4,7 @@ import os
 import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-
-from src.api.schemas import TitanicInput, TitanicOutput
+from src.api.schemas import TitanicInput, TitanicOutput, TitanicBatchInput, TitanicBatchOutput
 from src.api.model_handler import ModelHandler
 
 app = FastAPI(title="Titanic Survival Predictor")
@@ -36,6 +35,23 @@ def predict_survival(payload: TitanicInput):
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/predict_batch", response_model=TitanicBatchOutput)
+def predict_batch(payload: TitanicBatchInput):
+    if not handler:
+        raise HTTPException(status_code=500, detail="Server model is not initialized.")
+    
+    batch_results = []
+    try:
+        for item in payload.inputs:
+            pred, prob = handler.predict(item)
+            batch_results.append(TitanicOutput(prediction=pred, probability=prob))
+        
+        return TitanicBatchOutput(results=batch_results)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
