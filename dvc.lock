@@ -13,8 +13,8 @@ stages:
       size: 991
     - path: src/stages/data_load.py
       hash: md5
-      md5: fbf4760fdab687d90f12a08c508600ba
-      size: 965
+      md5: ba1270895ed0a9f6a68871e1392eb550
+      size: 1694
     params:
       config.yaml:
         paths:
@@ -53,8 +53,8 @@ stages:
       nfiles: 5
     - path: src/stages/data_preprocess.py
       hash: md5
-      md5: 7b8b4f7c30ad99a463183f5cc30f9fd8
-      size: 2397
+      md5: 4e8fccf6780bbbdf4c06a497b266d552
+      size: 3423
     params:
       config.yaml:
         params:
@@ -83,8 +83,8 @@ stages:
       size: 26257
     - path: src/stages/train.py
       hash: md5
-      md5: dd8b0a4d9938249536856fdabf7fc3be
-      size: 1639
+      md5: 3bbea5a9e4cc6c5ea060bf61c0f3de63
+      size: 2415
     params:
       config.yaml:
         model_params:
@@ -115,8 +115,8 @@ stages:
       size: 448247
     - path: src/stages/evaluate.py
       hash: md5
-      md5: e14fce242e13c2af694bf8084562a4f5
-      size: 1915
+      md5: 4c217c366ad1fe6b78aad533d6972375
+      size: 2563
     params:
       config.yaml:
         paths:

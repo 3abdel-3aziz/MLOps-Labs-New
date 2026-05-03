@@ -1,10 +1,11 @@
 import json
 import os
-
 import hydra
 import joblib
 import pandas as pd
 from omegaconf import DictConfig
+from utils.logger import get_logger 
+
 import mlflow.xgboost  
 import dagshub
 from sklearn.metrics import (
@@ -15,47 +16,58 @@ from sklearn.metrics import (
     recall_score,
 )
 
+logger = get_logger(__name__)
+
 dagshub.init(repo_owner='ahmed2025.mohamed2000', repo_name='MLOps-Labs-New', mlflow=True)
+
 @hydra.main(config_path="../../", config_name="config", version_base="1.2")
 def evaluate(cfg: DictConfig):
-    with mlflow.start_run():
-
-        test_df = pd.read_csv("data/processed/test_processed.csv")
+    try:
+        logger.info(">>> Starting Model Evaluation Stage <<<")
         
-        model = joblib.load("models/model.joblib")
+        with mlflow.start_run():
+            test_df = pd.read_csv("data/processed/test_processed.csv")
+            model = joblib.load("models/model.joblib")
+            logger.info(f"Test data and model loaded successfully. Test shape: {test_df.shape}")
 
-        TARGET = cfg.params.target
-        X_test = test_df.drop(columns=[TARGET])
-        y_test = test_df[TARGET]
+            TARGET = cfg.params.target
+            X_test = test_df.drop(columns=[TARGET])
+            y_test = test_df[TARGET]
 
-        print("Evaluating model...")
-        preds = model.predict(X_test)
+            logger.info("Executing model predictions on test set...")
+            preds = model.predict(X_test)
 
-        acc = accuracy_score(y_test, preds)
-        report = classification_report(y_test, preds)
+            acc = accuracy_score(y_test, preds)
+            report = classification_report(y_test, preds)
+            
+            logger.info(f"Evaluation Metrics Calculated - Accuracy: {acc:.4f}")
+            logger.info(f"\nDetailed Classification Report:\n{report}")
 
-        print(f"\n Model Accuracy: {acc:.4f}")
-        print("\nDetailed Classification Report:")
-        print(report)
+            os.makedirs("reports", exist_ok=True)
+            metrics = {
+                "accuracy": round(acc, 6),
+                "f1_weighted": round(f1_score(y_test, preds, average="weighted"), 6),
+                "precision_weighted": round(precision_score(y_test, preds, average="weighted"), 6),
+                "recall_weighted": round(recall_score(y_test, preds, average="weighted"), 6),
+            }
+            
+            with open("reports/metrics.json", "w") as f:
+                json.dump(metrics, f, indent=2)
+            
+            logger.info("Metrics saved to reports/metrics.json")
 
-        os.makedirs("reports", exist_ok=True)
+            with open("reports/metrics.txt", "w") as f:
+                f.write(f"Accuracy: {acc}\n")
+                f.write(report)
+            
+            mlflow.log_metrics(metrics)
+            logger.info("Metrics successfully logged to MLflow/DagsHub.")
 
-        metrics = {
-            "accuracy": round(acc, 6),
-            "f1_weighted": round(f1_score(y_test, preds, average="weighted"), 6),
-            "precision_weighted": round(precision_score(y_test, preds, average="weighted"), 6),
-            "recall_weighted": round(recall_score(y_test, preds, average="weighted"), 6),
-        }
-        with open("reports/metrics.json", "w") as f:
-            json.dump(metrics, f, indent=2)
+            logger.info("Model Evaluation completed successfully!")
 
-        with open("reports/metrics.txt", "w") as f:
-            f.write(f"Accuracy: {acc}\n")
-            f.write(report)
-        mlflow.log_metrics(metrics)    
-
-        print(f" Metrics saved -> reports/metrics.json")
-        print(" Evaluation completed and metrics saved via Hydra!")
+    except Exception as e:
+        logger.error(f"Error occurred during Model Evaluation: {str(e)}")
+        raise e
 
 if __name__ == "__main__":
     evaluate()
